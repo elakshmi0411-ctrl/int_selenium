@@ -17,38 +17,22 @@ public class LocalLoginTest {
 
     WebDriver driver;
 
-    // Runs before every test
+    // Setup function - runs before every test
     @BeforeMethod
     public void setUp() {
 
         ChromeOptions options = new ChromeOptions();
 
-        // Use Chromium inside Docker when CHROME_BIN is configured.
-        // Otherwise, use the locally installed Chrome browser.
-        String chromeBinary = System.getenv("CHROME_BIN");
-
-        if (chromeBinary != null && !chromeBinary.isEmpty()) {
-            options.setBinary(chromeBinary);
-        }
-
-        // Headless browser configuration
+        // Headless configuration for GitHub Actions
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");
 
-        // Use the installed ChromeDriver in Docker if available
-        File dockerDriver = new File("/usr/bin/chromedriver");
-
-        if (dockerDriver.exists()) {
-            System.setProperty(
-                "webdriver.chrome.driver",
-                dockerDriver.getAbsolutePath()
-            );
-        }
-
+        // Launch Chrome with the configured options
         driver = new ChromeDriver(options);
 
+        // Open the local HTML login page
         String page = new File("webpage/login.html")
                 .getAbsoluteFile()
                 .toURI()
@@ -57,18 +41,13 @@ public class LocalLoginTest {
         driver.get(page);
     }
 
-    // Test 1: Valid Login
+    // Test 1: Valid login
     @Test
     public void validLoginTest() {
 
-        driver.findElement(By.id("username"))
-                .sendKeys("student");
-
-        driver.findElement(By.id("password"))
-                .sendKeys("12345");
-
-        driver.findElement(By.id("loginButton"))
-                .click();
+        driver.findElement(By.id("username")).sendKeys("student");
+        driver.findElement(By.id("password")).sendKeys("12345");
+        driver.findElement(By.id("loginButton")).click();
 
         String message =
                 driver.findElement(By.id("message")).getText();
@@ -78,18 +57,13 @@ public class LocalLoginTest {
         Assert.assertEquals(message, "Login Successful");
     }
 
-    // Test 2: Invalid Login
+    // Test 2: Invalid login
     @Test
     public void invalidLoginTest() {
 
-        driver.findElement(By.id("username"))
-                .sendKeys("wrong");
-
-        driver.findElement(By.id("password"))
-                .sendKeys("wrong");
-
-        driver.findElement(By.id("loginButton"))
-                .click();
+        driver.findElement(By.id("username")).sendKeys("wrong");
+        driver.findElement(By.id("password")).sendKeys("wrong");
+        driver.findElement(By.id("loginButton")).click();
 
         String message =
                 driver.findElement(By.id("message")).getText();
@@ -102,12 +76,11 @@ public class LocalLoginTest {
         );
     }
 
-    // Test 3: Background Color Verification
+    // Test 3: Check background color
     @Test
     public void checkBackgroundColor() {
 
-        String bgColor =
-                driver.findElement(By.id("loginBox"))
+        String bgColor = driver.findElement(By.id("loginBox"))
                 .getCssValue("background-color");
 
         System.out.println("Background Color: " + bgColor);
@@ -118,7 +91,7 @@ public class LocalLoginTest {
         );
     }
 
-    // Runs after every test
+    // Close browser after every test
     @AfterMethod
     public void tearDown() {
 
