@@ -23,10 +23,29 @@ public class LocalLoginTest {
 
         ChromeOptions options = new ChromeOptions();
 
+        // Use Chromium inside Docker when CHROME_BIN is configured.
+        // Otherwise, use the locally installed Chrome browser.
+        String chromeBinary = System.getenv("CHROME_BIN");
+
+        if (chromeBinary != null && !chromeBinary.isEmpty()) {
+            options.setBinary(chromeBinary);
+        }
+
+        // Headless browser configuration
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");
+
+        // Use the installed ChromeDriver in Docker if available
+        File dockerDriver = new File("/usr/bin/chromedriver");
+
+        if (dockerDriver.exists()) {
+            System.setProperty(
+                "webdriver.chrome.driver",
+                dockerDriver.getAbsolutePath()
+            );
+        }
 
         driver = new ChromeDriver(options);
 
@@ -103,6 +122,8 @@ public class LocalLoginTest {
     @AfterMethod
     public void tearDown() {
 
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
